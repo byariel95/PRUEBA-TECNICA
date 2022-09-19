@@ -16,8 +16,14 @@ export class FiscaliaService {
   async create(createFiscaliaDto: CreateFiscaliaDto) {
     try {
       
-      const fiscalia = this.fiscaliaRepository.create(createFiscaliaDto);
-      return await this.fiscaliaRepository.save(fiscalia);
+      const newFiscalia = this.fiscaliaRepository.create(createFiscaliaDto);
+      const fiscalia = await this.fiscaliaRepository.save(newFiscalia);
+      return {
+        id:fiscalia.id,
+        name:fiscalia.nombre,
+        ubication: fiscalia.ubicacion,
+        phone: fiscalia.telefono
+      }
     } catch (error) {
       throw error;
     }
@@ -26,7 +32,17 @@ export class FiscaliaService {
 
   async findAll() {
     try {
-      return await this.fiscaliaRepository.find();
+      const data =await this.fiscaliaRepository.find();
+      const response = data.map((fiscalia)=> {
+        return {
+          id:fiscalia.id,
+          name: fiscalia.nombre,
+          ubication:fiscalia.ubicacion,
+          phone: fiscalia.telefono
+        }
+      })
+      return response;
+
     } catch (error) {
       throw new NotFoundException()
     }
@@ -44,7 +60,12 @@ export class FiscaliaService {
         throw new NotFoundException();
       }
 
-      return fiscalia;
+      return {
+        id:fiscalia.id,
+        name: fiscalia.nombre,
+        ubication:fiscalia.ubicacion,
+        phone: fiscalia.telefono
+      };
     } catch (error) {
       throw error;
     }
@@ -54,7 +75,13 @@ export class FiscaliaService {
     try {
       const fiscalia = await this.findOne(id);
       const fiscaliaUpdated = {...fiscalia,...updateFiscaliaDto}
-      return this.fiscaliaRepository.save(fiscaliaUpdated);
+      const fiscaliaSaved = await this.fiscaliaRepository.save(fiscaliaUpdated);
+      return {
+        id:fiscaliaSaved.id,
+        name:fiscaliaSaved.nombre,
+        ubication: fiscaliaSaved.ubicacion,
+        phone: fiscaliaSaved.telefono
+      }
 
     } catch (error) {
       throw new BadRequestException()
@@ -64,8 +91,11 @@ export class FiscaliaService {
   async remove(id: number) {
     try {
       const toDelete = await this.findOne(id);
-      this.fiscaliaRepository.remove(toDelete)
-      return `fislcalia con ID #${id} Fue Eliminado`;
+      this.fiscaliaRepository.remove({id:toDelete.id,nombre:toDelete.name,ubicacion:toDelete.ubication,telefono:toDelete.phone})
+      return {
+        status : 200,
+        message: `fiscalia con ID ${id} Fue Eliminado`
+      }
     } catch (error) {
       throw new BadRequestException()
     }

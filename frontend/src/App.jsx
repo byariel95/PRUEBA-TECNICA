@@ -1,34 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import {
+  FormFiscalia,
+  ListadoFiscalias,
+  Header
+} from './components'
+import {useState, useEffect} from 'react';
+import { ApiService } from './api/api.service';
+
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [fiscalias, setFiscalias] = useState([]);
+  const [fiscalia, setFiscalia] = useState({});
+  useEffect(()=> {
+    getFiscalias()
+  },[])
+
+  const getFiscalias = async () =>{
+    const url = 'fiscalia';
+    const apiFiscalia = new ApiService()
+    const response = await apiFiscalia.getFiscalias(url);
+    setFiscalias([...response])
+  }
+
+  const deleteFiscalia = async (id) =>
+  {
+    const url = 'fiscalia';
+    const apiFiscalia = new ApiService()
+    const response = await apiFiscalia.deleteFiscalia(url,id);
+    if(response.status === 200){
+      const deletedFiscalia = fiscalias.filter((fiscalia)=> fiscalia.id !== id )
+      setFiscalias(deletedFiscalia);
+    }
+
+  }
+
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+ <>
+    <Header/>
+    <div className="container mx-auto">
+      <div className='mt-12 md:flex'>
+        <FormFiscalia setFiscalias={setFiscalias} fiscalias={fiscalias} fiscalia={fiscalia} setFiscalia={setFiscalia}/>
+        <ListadoFiscalias fiscalias={fiscalias} setFiscalia={setFiscalia} deleteFiscalia={deleteFiscalia} />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+    </div>  
+ </>
+ )
 }
 
 export default App
